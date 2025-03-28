@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-
+import sequelize from "./config/db.js";
+import userRoutes from "./routes/userRoutes.js"; // Use import here
 
 dotenv.config(); // Load environment variables
 
@@ -22,22 +23,20 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-
-///Initializing Sequelize
-
-import sequelize  from "./config/db.js";
-
+/// Initializing Sequelize
 const startServer = async () => {
-    try{
+    try {
         await sequelize.authenticate();
-        console.log("Database connected successfully")
+        console.log("Database connected successfully");
         
-        await sequelize.authenticate();
+        await sequelize.sync();
         console.log("Tables synced");
-
-    }catch (error){
-        console.error("Database connection failed", error)
+    } catch (error) {
+        console.error("Database connection failed", error);
     }
 };
 
 startServer();
+
+// Use the user routes
+app.use('/api', userRoutes); // ✅ Using import
