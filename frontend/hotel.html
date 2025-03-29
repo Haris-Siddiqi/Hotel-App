@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hotels</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h2>Find a Hotel Room</h2>
+    <form id="searchForm">
+        <input type="date" id="startDate" required>
+        <input type="date" id="endDate" required>
+        <input type="number" id="capacity" placeholder="Capacity">
+        <input type="text" id="area" placeholder="Area">
+        <input type="text" id="hotelChain" placeholder="Hotel Chain">
+        <input type="number" id="category" placeholder="Category">
+        <input type="number" id="numRooms" placeholder="Total Rooms">
+        <input type="number" id="price" placeholder="Max Price">
+        <button type="submit">Search</button>
+    </form>
+
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const filters = {
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                capacity: document.getElementById('capacity').value,
+                area: document.getElementById('area').value,
+                hotelChain: document.getElementById('hotelChain').value,
+                category: document.getElementById('category').value,
+                numRooms: document.getElementById('numRooms').value,
+                price: document.getElementById('price').value,
+            };
+
+            const response = await fetch('http://localhost:3000/api/hotels', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(filters)
+            });
+
+            const hotels = await response.json();
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = hotels.map(hotel => `
+                <div>
+                    <h3>${hotel.name}</h3>
+                    <p>Location: ${hotel.area}</p>
+                    <p>Price: $${hotel.price}/night</p>
+                    <button onclick="bookHotel(${hotel.id})">Book Now</button>
+                </div>
+            `).join('');
+        });
+
+        async function bookHotel(hotelId) {
+            const response = await fetch(`http://localhost:3000/api/book/${hotelId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert('Booking successful');
+            } else {
+                alert(data.message);
+            }
+        }
+    </script>
+</body>
+</html>
